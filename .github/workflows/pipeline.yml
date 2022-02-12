@@ -43,8 +43,8 @@ jobs:
           healthcheck: "https://sheltered-mountain-75670.herokuapp.com/health"
           checkstring: "ok"
           rollbackonhealthcheckfailed: true
-      - name: post job failure/cancellation to slack
-        if: job.status == 'failure || job.status == 'cancelled
+      - name: post job failure to slack
+        if: failure()
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
@@ -52,7 +52,7 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       - name: post job success to slack
-        if: job.status == 'success'
+        if: success()
         uses: 8398a7/action-slack@v3
         with:
           status: custom
@@ -60,8 +60,8 @@ jobs:
           custom_payload: |
             {
               attachments: [{
-              color: 'good'
-              text: `A new version deployed',
+                color: 'good',
+                text: `A new version deployed to https://sheltered-mountain-75670.herokuapp.com (${process.env.AS_COMMIT}) by ${process.env.AS_AUTHOR} build took ${process.env.AS_TOOK}`,
               }]
             }
         env:
@@ -78,3 +78,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: patch
+
